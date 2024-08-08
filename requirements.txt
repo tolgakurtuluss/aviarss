@@ -1,0 +1,3 @@
+pandas
+feedgen
+fastapi
