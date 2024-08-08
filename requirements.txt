@@ -1,3 +1,4 @@
 pandas
 feedgen
 fastapi
+uvicorn
