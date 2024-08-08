@@ -3,3 +3,4 @@ uvicorn
 pandas
 feedgen
 openpyxl
+jinja2

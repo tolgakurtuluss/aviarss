@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RSS Service</title>
+    <link rel="stylesheet" href="/static/styles.css"> <!-- Link to your CSS file -->
+</head>
+<body>
+    <header>
+        <h1>Welcome to the RSS Service</h1>
+        <p>Your web-service for generating and filtering RSS feeds based on IATA codes of airports.</p>
+    </header>
+    <main>
+        <section>
+            <h2>How to Use</h2>
+            <p>To generate an RSS feed, follow these steps:</p>
+            <ol>
+                <li>
+                    <strong>Use the following endpoint:</strong>
+                    <p><code>https://aviarss.onrender.com/rss/{iata_code}</code></p>
+                </li>
+                <li>
+                    <strong>Replace <code>{iata_code}</code> with the desired IATA code.</strong>
+                </li><br>
+                <li>
+                    <strong>Example:</strong>
+                    <p>To get the RSS feed for Istanbul Airport, use:</p>
+                    <p><code>https://aviarss.onrender.com/rss/IST</code></p>
+                </li>
+            </ol>
+            
+        </section>
+        
+        
+        <section>
+            <h2>Feeds by Continent</h2>
+            <h3>America</h3>
+            <ul>
+                <li><a href="/rss/LAX">Los Angeles International Airport (LAX)</a></li>
+                <li><a href="/rss/JFK">John F. Kennedy International Airport (JFK)</a></li>
+                <li><a href="/rss/ORD">Chicago O'Hare International Airport (ORD)</a></li>
+            </ul>
+            <h3>Europe</h3>
+            <ul>
+                <li><a href="/rss/LHR">London Heathrow Airport (LHR)</a></li>
+                <li><a href="/rss/AMS">Amsterdam Schiphol Airport (AMS)</a></li>
+                <li><a href="/rss/CDG">Paris Charles de Gaulle Airport (CDG)</a></li>
+            </ul>
+            <h3>Africa</h3>
+            <ul>
+                <li><a href="/rss/JNB">O.R. Tambo International Airport (JNB)</a></li>
+                <li><a href="/rss/CAI">Cairo International Airport (CAI)</a></li>
+                <li><a href="/rss/CPT">Cape Town International Airport (CPT)</a></li>
+            </ul>
+            <h3>Asia</h3>
+            <ul>
+                <li><a href="/rss/PEK">Beijing Capital International Airport (PEK)</a></li>
+                <li><a href="/rss/HND">Tokyo Haneda Airport (HND)</a></li>
+                <li><a href="/rss/DXB">Dubai International Airport (DXB)</a></li>
+            </ul>
+            <h3>Australia</h3>
+            <ul>
+                <li><a href="/rss/SYD">Sydney Kingsford Smith Airport (SYD)</a></li>
+                <li><a href="/rss/MEL">Melbourne Airport (MEL)</a></li>
+                <li><a href="/rss/BNE">Brisbane Airport (BNE)</a></li>
+            </ul>
+        </section>
+    </main>
+    <footer>
+        <p>&copy; 2024 RSS Service. All rights reserved.</p>
+    </footer>
+</body>
+</html>
