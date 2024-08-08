@@ -1,4 +1,5 @@
-pandas
-feedgen
 fastapi
 uvicorn
+pandas
+feedgen
+openpyxl
