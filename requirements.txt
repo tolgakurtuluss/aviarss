@@ -6,3 +6,4 @@ feedparser
 openpyxl
 jinja2
 pymongo
+bs4
