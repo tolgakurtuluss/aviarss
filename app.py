@@ -40,7 +40,7 @@ client = MongoClient(mongo_uri, server_api=ServerApi('1'))
 db = client[database_name]
 collection = db[collection_name]
 
-def calculate_similarity(text, tags, threshold=0.7):
+def calculate_similarity(text, tags, threshold=0.9):
     vectorizer = TfidfVectorizer().fit_transform([text] + tags)
     vectors = vectorizer.toarray()
     cosine_sim = cosine_similarity(vectors[0:1], vectors[1:])
