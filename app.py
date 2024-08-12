@@ -25,19 +25,23 @@ client = MongoClient(os.environ.get("MONGODB_URI"), server_api=ServerApi('1'))  
 db = client[os.environ.get("DATABASE_NAME")]  # Get database name from environment variable
 collection = db[os.environ.get("COLLECTION_NAME")]  # Get collection name from environment variable
 
-def get_data_from_source(iata_code = None):
+def get_data_from_source(iata_code=None):
     # Fetch documents from MongoDB
     if iata_code:
         # Assuming you have a way to get the tags from the IATA code
         airportdf = pd.read_excel("./data/airportcode.xlsx")
         airportdf = airportdf[airportdf['IATACode'] == iata_code]
 
-        airportdf['tags'] = airportdf[['IATACode', 'AirportName', 'CountryName', 'City']].values.tolist()
+        airportdf['tags'] = airportdf[['IATACode', 'AirportName', 'City']].values.tolist()
         tags = [tag for sublist in airportdf['tags'] for tag in sublist]
 
         # Create a query to filter documents based on the tags
         query = {'$or': [{'Body': {'$regex': tag, '$options': 'i'}} for tag in tags]}
         filtered_items = list(collection.find(query))
+
+        # Add tags to each item
+        for item in filtered_items:
+            item['tags'] = tags  # Add tags to each item
 
         return filtered_items
     else:
@@ -139,6 +143,12 @@ def generate_rss_feed(iata_code: str):
         fe = fg.add_entry()
         fe.title(str(item['Title']))
         fe.description(str(item['Body']))
+
+        # Include tags in the description or as additional elements
+        if 'tags' in item:
+            tags_str = ', '.join(item['tags'])  # Convert tags list to a string
+            fe.description(f"{fe.description()}<br/><strong>Matched Tags:</strong> {tags_str}")  # Append tags to the description
+
         fe.link(href=str(item['Link']))
 
     rss_feed = fg.rss_str(pretty=True)
