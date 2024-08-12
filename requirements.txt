@@ -2,6 +2,7 @@ fastapi
 uvicorn
 pandas
 feedgen
+feedparser
 openpyxl
 jinja2
 pymongo
