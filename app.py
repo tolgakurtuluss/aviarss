@@ -9,7 +9,6 @@ from fastapi import Request
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
-from fastapi import BackgroundTasks
 import pandas as pd
 from pymongo import MongoClient
 from pymongo.mongo_client import MongoClient
@@ -44,17 +43,13 @@ def get_data_from_source(iata_code = None):
         return []
 
 def run_feed_update_if_time():
-    while True:
-        now = datetime.datetime.now()
+    now = datetime.datetime.now()
         
-        # Check if the current minute is between 30 and 35
-        if 30 <= now.minute <= 35:
-            # Construct the path to the feedupdate.py script
-            script_path = os.path.join(os.path.dirname(__file__), 'feedupdate.py')
+    if 30 <= now.minute <= 35:
+        script_path = os.path.join(os.path.dirname(__file__), 'feedupdate.py')
             
-            # Run the script
-            subprocess.run(['python', script_path], check=True)
-            print("feedupdate.py has been executed.")
+        subprocess.run(['python', script_path], check=True)
+        print("feedupdate.py has been executed.")
         
 @app.get("/rss/{iata_code}")
 def generate_rss_feed(iata_code: str):
@@ -64,7 +59,7 @@ def generate_rss_feed(iata_code: str):
     fg.description('This is an example RSS feed')
 
     # Run feed update in a background task
-    background_tasks.add_task(run_feed_update_if_time)
+    run_feed_update_if_time()
 
     items = get_data_from_source(iata_code)
 
