@@ -40,23 +40,13 @@ def get_data_from_source(iata_code=None):
         tag_list = airport_df['tagList'].values[0]  # Get the tagList as a string
         tags = tag_list.split(', ')  # Split the tagList into a list of tags
 
-        # Create a query to filter documents based on the tags with word boundaries
-        query = {
-            '$or': [
-                {'Body': {'$regex': f'\\b{tag}\\b', '$options': 'i'}} for tag in tags
-            ]
-        }
-        
+        # Create a query to filter documents based on the tags
+        query = {'$or': [{'Body': {'$regex': tag, '$options': 'i'}} for tag in tags]}
         filtered_items = list(collection.find(query))
-
         # Add matched tags to each item
         for item in filtered_items:
-            matched_tags = [
-                tag for tag in tags 
-                if (f' {tag} ' in f' {item["Body"]} ' or item['Body'].startswith(tag) or item['Body'].endswith(tag))
-            ]
+            matched_tags = [tag for tag in tags if tag.lower() in item['Body'].lower()]
             item['matched_tags'] = matched_tags  # Add only matched tags to each item
-
         return filtered_items
     else:
         # If no IATA code is provided, return all items
