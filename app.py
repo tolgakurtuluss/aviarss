@@ -116,7 +116,6 @@ rss_sources = [
     'https://samchui.com/feed/'
 ]
 
-
 def run_feed_update_if_time():
     now = datetime.datetime.now()
         
@@ -151,7 +150,14 @@ def generate_rss_feed(iata_code: str):
         if 'matched_tags' in item and item['matched_tags']:
             tags_str = ', '.join(item['matched_tags'])  # Convert matched tags list to a string
             # Append matched tags to the description
-            fe.description(f"{fe.description()}<br/><strong>Matched Tags:</strong> {tags_str}")
+            fe.description(f"{fe.description()}<br/><br/><strong>Matched Tags:</strong> {tags_str}")
+
+        # Include published date and time if available
+        if 'Published_Date_Formatted' in item and item['Published_Date_Formatted']:
+            fe.description(f"{fe.description()}<br/><br/><strong>Published Date:</strong> {item['Published_Date_Formatted']}")
+        
+        if 'Published_Time' in item and item['Published_Time']:
+            fe.description(f"{fe.description()}<br/><strong>Published Time:</strong> {item['Published_Time']}")
 
         fe.link(href=str(item['Link']))
 
