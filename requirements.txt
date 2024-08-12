@@ -4,3 +4,4 @@ pandas
 feedgen
 openpyxl
 jinja2
+pymongo
