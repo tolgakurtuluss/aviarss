@@ -44,8 +44,6 @@ def get_data_from_source(iata_code=None):
         query = {
             '$or': [
                 {'Body': {'$regex': f'\\b{tag}\\b', '$options': 'i'}} for tag in tags
-            ] + [
-                {'Title': {'$regex': f'\\b{tag}\\b', '$options': 'i'}} for tag in tags
             ]
         }
         
@@ -55,8 +53,7 @@ def get_data_from_source(iata_code=None):
         for item in filtered_items:
             matched_tags = [
                 tag for tag in tags 
-                if (f' {tag} ' in f' {item["Body"]} ' or item['Body'].startswith(tag) or item['Body'].endswith(tag)) or
-                   (f' {tag} ' in f' {item["Title"]} ' or item['Title'].startswith(tag) or item['Title'].endswith(tag))
+                if (f' {tag} ' in f' {item["Body"]} ' or item['Body'].startswith(tag) or item['Body'].endswith(tag))
             ]
             item['matched_tags'] = matched_tags  # Add only matched tags to each item
 
