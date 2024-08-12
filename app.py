@@ -164,7 +164,7 @@ def generate_rss_feed(iata_code: str):
         # Append matched tags to the description
         if 'matched_tags' in item and item['matched_tags']:
             tags_str = ', '.join(item['matched_tags'])  # Convert matched tags list to a string
-            fe.description(f"{fe.description()}<br/><br/><strong>Matched Tags:</strong> <u>{tags_str}</u>")
+            fe.description(f"{fe.description()}<br/><br/><strong>Matched Tags:</strong> {tags_str}")
 
         # Include published date and time if available
         if 'Published_Date_Formatted' in item and item['Published_Date_Formatted']:
