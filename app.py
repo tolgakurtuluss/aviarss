@@ -39,9 +39,10 @@ def get_data_from_source(iata_code=None):
         query = {'$or': [{'Body': {'$regex': tag, '$options': 'i'}} for tag in tags]}
         filtered_items = list(collection.find(query))
 
-        # Add tags to each item
+        # Add matched tags to each item
         for item in filtered_items:
-            item['tags'] = tags  # Add tags to each item
+            matched_tags = [tag for tag in tags if tag.lower() in item['Body'].lower()]
+            item['matched_tags'] = matched_tags  # Add only matched tags to each item
 
         return filtered_items
     else:
@@ -142,18 +143,18 @@ def generate_rss_feed(iata_code: str):
     for item in items:
         fe = fg.add_entry()
         fe.title(str(item['Title']))
+        
+        # Include only matched tags in the description
+        if 'matched_tags' in item and item['matched_tags']:
+            tags_str = ', '.join(item['matched_tags'])  # Convert matched tags list to a string
+            fe.description(f"{fe.description()}<br/><strong>Matched Tags:</strong> {tags_str}")  # Append matched tags to the description
+
         fe.description(str(item['Body']))
-
-        # Include tags in the description or as additional elements
-        if 'tags' in item:
-            tags_str = ', '.join(item['tags'])  # Convert tags list to a string
-            fe.description(f"{fe.description()}<br/><strong>Matched Tags:</strong> {tags_str}")  # Append tags to the description
-
         fe.link(href=str(item['Link']))
 
     rss_feed = fg.rss_str(pretty=True)
     return Response(content=rss_feed, media_type='application/rss+xml')
-
+    
 @app.get("/", response_class=HTMLResponse)
 async def read_home(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
