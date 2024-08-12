@@ -40,12 +40,12 @@ client = MongoClient(mongo_uri, server_api=ServerApi('1'))
 db = client[database_name]
 collection = db[collection_name]
 
-def calculate_similarity(text, tags):
+def calculate_similarity(text, tags, threshold=0.7):
     vectorizer = TfidfVectorizer().fit_transform([text] + tags)
     vectors = vectorizer.toarray()
     cosine_sim = cosine_similarity(vectors[0:1], vectors[1:])
-    return [tags[i] for i in range(len(tags)) if cosine_sim[0][i] > 0.5]
-
+    return [tags[i] for i in range(len(tags)) if cosine_sim[0][i] > threshold]
+    
 async def get_data_from_source(iata_code=None):
     if iata_code:
         # Load airport data from Excel
