@@ -9,6 +9,7 @@ from fastapi import Request
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
+from fastapi import BackgroundTasks
 import pandas as pd
 from pymongo import MongoClient
 from pymongo.mongo_client import MongoClient
@@ -62,14 +63,15 @@ def generate_rss_feed(iata_code: str):
     fg.link(href='http://www.example.com', rel='alternate')
     fg.description('This is an example RSS feed')
 
-    run_feed_update_if_time()
+    # Run feed update in a background task
+    background_tasks.add_task(run_feed_update_if_time)
 
     items = get_data_from_source(iata_code)
 
-    if items.empty:
+    if not items:  # Check if the list is empty
         raise HTTPException(status_code=404, detail="No items found for the given IATA code")
 
-    for index, item in items.iterrows():
+    for item in items:
         fe = fg.add_entry()
         fe.title(str(item['Title']))
         fe.description(str(item['Body']))
