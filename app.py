@@ -2,16 +2,18 @@ import os
 import datetime
 import subprocess
 import time
-from fastapi import FastAPI, HTTPException
-from fastapi.responses import Response
-from feedgen.feed import FeedGenerator
-from fastapi import Request
-from fastapi.responses import HTMLResponse
+
+from fastapi import FastAPI, HTTPException, Request
+from fastapi.responses import Response, HTMLResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
+
+from feedgen.feed import FeedGenerator
+import feedparser
 import pandas as pd
+from bs4 import BeautifulSoup
+from dateutil import parser
 from pymongo import MongoClient
-from pymongo.mongo_client import MongoClient
 from pymongo.server_api import ServerApi
 
 app = FastAPI()
@@ -41,14 +43,81 @@ def get_data_from_source(iata_code = None):
     else:
         # If no IATA code is provided, return all items
         return []
+    
+def process_rss_feeds(rss_sources):
+    # Initialize data storage
+    data = {'Title': [], 'Body': [], 'Link': [], 'Published_Date': [], 'Published_Date_Formatted': [], 'Published_Time': []}
+
+    # Parse RSS sources
+    for source in rss_sources:
+        feed = feedparser.parse(source)
+        for entry in feed.entries:
+            data['Title'].append(entry.title)
+            soup = BeautifulSoup(entry.summary, 'html.parser')
+            text = soup.get_text().strip()
+            data['Body'].append(text)
+            data['Link'].append(entry.link)
+            
+            if 'published' in entry:
+                data['Published_Date'].append(entry.published)
+                try:
+                    parsed_date = parser.parse(entry.published)
+                    data['Published_Date_Formatted'].append(parsed_date.strftime('%Y-%m-%d'))
+                    data['Published_Time'].append(parsed_date.strftime('%H:%M:%S'))
+                except ValueError:
+                    data['Published_Date_Formatted'].append(None)
+                    data['Published_Time'].append(None)
+            else:
+                data['Published_Date'].append(None)
+                data['Published_Date_Formatted'].append(None)
+                data['Published_Time'].append(None)
+
+    df = pd.DataFrame(data)
+
+    # Read existing records from MongoDB
+    existing_records = collection.distinct("Link")  # Get unique links from existing records
+
+    # Filter out existing records
+    df['is_existing'] = df['Link'].isin(existing_records)
+    new_records = df[~df['is_existing']].drop(columns=['is_existing'])
+
+    # Upload new unique records to MongoDB
+    records = new_records.to_dict(orient='records')
+    if records:
+        collection.insert_many(records)
+        print(f"Successfully uploaded {len(records)} new records to MongoDB.")
+    else:
+        print("No new records found to upload.")
+
+# Example list of RSS sources
+rss_sources = [
+    'https://www.airporthaber2.com/rss/',
+    'https://haber.aero/feed/',
+    'https://havasosyalmedya.com/feed/', 
+    'https://www.airlinehaber.com/feed/',
+    'https://www.aeroroutes.com/?format=rss',
+    'https://tolgaozbek.com/feed/',
+    'https://airlinegeeks.com/feed/',
+    'https://www.flyertalk.com/feed',
+    'https://worldairlinenews.com/feed/',
+    'https://www.flightradar24.com/blog/feed/',
+    'https://www.sabre.com/feed/',
+    'https://www.cirium.com/thoughtcloud/feed/',
+    'https://www.aerotime.aero/category/airlines/feed',
+    'https://www.radarbox.com/blog/feed',
+    'https://simpleflying.com/feed/',
+    'https://theaviationist.com/feed/',
+    'https://feeds.feedburner.com/Ex-yuAviationNews',
+    'https://samchui.com/feed/'
+]
+
 
 def run_feed_update_if_time():
     now = datetime.datetime.now()
         
     if 30 <= now.minute <= 35:
-        script_path = os.path.join(os.path.dirname(__file__), 'feedupdate.py')
-            
-        subprocess.run(['python', script_path], check=True)
+        # Call the function with the RSS sources
+        process_rss_feeds(rss_sources)
         print("feedupdate.py has been executed.")
         
 @app.get("/rss/{iata_code}")
