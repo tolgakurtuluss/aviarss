@@ -7,3 +7,4 @@ openpyxl
 jinja2
 pymongo
 bs4
+sklearn
