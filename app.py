@@ -151,7 +151,7 @@ def generate_rss_feed(iata_code: str):
             # Bold the matched tags in the body text
             for tag in item['matched_tags']:
                 # Use regex to replace the tag with a bolded version
-                body_text = body_text.replace(tag, f"<strong>{tag}</strong>")
+                body_text = body_text.replace(tag, f"<strong><u>{tag}</u></strong>")
 
         # Set the modified body text as the description
         fe.description(body_text)
@@ -159,7 +159,7 @@ def generate_rss_feed(iata_code: str):
         # Append matched tags to the description
         if 'matched_tags' in item and item['matched_tags']:
             tags_str = ', '.join(item['matched_tags'])  # Convert matched tags list to a string
-            fe.description(f"{fe.description()}<br/><strong>Matched Tags:</strong> {tags_str}")
+            fe.description(f"{fe.description()}<br/><br/><strong>Matched Tags:</strong> <u>{tags_str}</u>")
 
         # Include published date and time if available
         if 'Published_Date_Formatted' in item and item['Published_Date_Formatted']:
