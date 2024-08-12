@@ -144,12 +144,15 @@ def generate_rss_feed(iata_code: str):
         fe = fg.add_entry()
         fe.title(str(item['Title']))
         
+        # Set the body as the description first
+        fe.description(str(item['Body']))
+
         # Include only matched tags in the description
         if 'matched_tags' in item and item['matched_tags']:
             tags_str = ', '.join(item['matched_tags'])  # Convert matched tags list to a string
-            fe.description(f"{fe.description()}<br/><strong>Matched Tags:</strong> {tags_str}")  # Append matched tags to the description
+            # Append matched tags to the description
+            fe.description(f"{fe.description()}<br/><strong>Matched Tags:</strong> {tags_str}")
 
-        fe.description(str(item['Body']))
         fe.link(href=str(item['Link']))
 
     rss_feed = fg.rss_str(pretty=True)
