@@ -142,19 +142,28 @@ def generate_rss_feed(iata_code: str):
     for item in items:
         fe = fg.add_entry()
         fe.title(str(item['Title']))
-        
-        # Set the body as the description first
-        fe.description(str(item['Body']))
+
+        # Get the body text
+        body_text = str(item['Body'])
 
         # Include only matched tags in the description
         if 'matched_tags' in item and item['matched_tags']:
+            # Bold the matched tags in the body text
+            for tag in item['matched_tags']:
+                # Use regex to replace the tag with a bolded version
+                body_text = body_text.replace(tag, f"<strong>{tag}</strong>")
+
+        # Set the modified body text as the description
+        fe.description(body_text)
+
+        # Append matched tags to the description
+        if 'matched_tags' in item and item['matched_tags']:
             tags_str = ', '.join(item['matched_tags'])  # Convert matched tags list to a string
-            # Append matched tags to the description
-            fe.description(f"{fe.description()}<br/><br/><strong>Matched Tags:</strong> {tags_str}")
+            fe.description(f"{fe.description()}<br/><strong>Matched Tags:</strong> {tags_str}")
 
         # Include published date and time if available
         if 'Published_Date_Formatted' in item and item['Published_Date_Formatted']:
-            fe.description(f"{fe.description()}<br/><br/><strong>Published Date:</strong> {item['Published_Date_Formatted']}")
+            fe.description(f"{fe.description()}<br/><strong>Published Date:</strong> {item['Published_Date_Formatted']}")
         
         if 'Published_Time' in item and item['Published_Time']:
             fe.description(f"{fe.description()}<br/><strong>Published Time:</strong> {item['Published_Time']}")
