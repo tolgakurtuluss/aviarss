@@ -44,7 +44,10 @@ def calculate_similarity(text, tags, threshold=0.9):
     vectorizer = TfidfVectorizer().fit_transform([text] + tags)
     vectors = vectorizer.toarray()
     cosine_sim = cosine_similarity(vectors[0:1], vectors[1:])
-    return [tags[i] for i in range(len(tags)) if cosine_sim[0][i] > threshold]
+    matched = [tags[i] for i in range(len(tags)) if cosine_sim[0][i] > threshold]
+    logger.info(f"Matched tags for text: {text} are {matched}")
+    return matched
+
     
 async def get_data_from_source(iata_code=None):
     if iata_code:
@@ -64,7 +67,8 @@ async def get_data_from_source(iata_code=None):
         for item in filtered_items:
             matched_tags = calculate_similarity(item['Body'], tags)
             item['matched_tags'] = matched_tags
-        return filtered_items
+            logger.info(f"Item: {item['Body']} matched tags: {matched_tags}")
+
     else:
         return []
 
@@ -154,23 +158,22 @@ async def generate_rss_feed(iata_code: str):
         fe = fg.add_entry()
         fe.title(str(item['Title']))
         body_text = str(item['Body'])
-
+    
         if 'matched_tags' in item and item['matched_tags']:
             for tag in item['matched_tags']:
                 body_text = body_text.replace(tag, f"<strong><u>{tag}</u></strong>")
-
-        fe.description(body_text)
-
-        if 'matched_tags' in item and item['matched_tags']:
+    
             tags_str = ', '.join(item['matched_tags'])
-            fe.description(f"{fe.description()}<br/><br/><strong>Matched Tags:</strong> {tags_str}")
-
+            body_text += f"<br/><br/><strong>Matched Tags:</strong> {tags_str}"
+    
+        fe.description(body_text)
+    
         if 'Published_Date_Formatted' in item and item['Published_Date_Formatted']:
             fe.description(f"{fe.description()}<br/><strong>Published Date:</strong> {item['Published_Date_Formatted']}")
-
+    
         if 'Published_Time' in item and item['Published_Time']:
             fe.description(f"{fe.description()}<br/><strong>Published Time:</strong> {item['Published_Time']}")
-
+    
         fe.link(href=str(item['Link']))
 
     rss_feed = fg.rss_str(pretty=True)
