@@ -1,14 +1,10 @@
 import os
-import datetime
 import pandas as pd
-import feedparser
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import Response, HTMLResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 from feedgen.feed import FeedGenerator
-from bs4 import BeautifulSoup
-from dateutil import parser
 from pymongo import MongoClient
 from pymongo.server_api import ServerApi
 
@@ -21,11 +17,7 @@ templates = Jinja2Templates(directory="templates")
 mongo_client = MongoClient(os.environ.get("MONGODB_URI"), server_api=ServerApi('1'))
 db = mongo_client[os.environ.get("DATABASE_NAME")]
 collection = db[os.environ.get("COLLECTION_NAME")]
-rss_sources_collection = db[os.environ.get("RSS_SOURCES_COLLECTION_NAME")]
 airport_collection = db[os.environ.get("AIRPORT_COLLECTION_NAME")]
-
-# Fetch RSS sources from MongoDB
-rss_sources = [doc['rss_source'] for doc in rss_sources_collection.find({}, {'rss_source': 1})]
 
 all_documents = list(airport_collection.find())
 airport_df = pd.DataFrame(all_documents)
@@ -57,70 +49,12 @@ def get_data_from_source(iata_code=None):
     """Fetch data from MongoDB based on the provided IATA code."""
     if not iata_code:
         return []
-
+    
     airport_df = fetch_airport_data(iata_code)
     tags = get_tags_from_airport_data(airport_df)
     filtered_items = query_documents_by_tags(tags)
+
     return add_matched_tags_to_items(filtered_items, tags)
-
-def process_rss_feeds(rss_sources):
-    """Process RSS feeds and upload new records to MongoDB."""
-    data = {
-        'Title': [],
-        'Body': [],
-        'Link': [],
-        'Published_Date': [],
-        'Published_Date_Formatted': [],
-        'Published_Time': []
-    }
-
-    for source in rss_sources:
-        feed = feedparser.parse(source)
-        for entry in feed.entries:
-            data['Title'].append(entry.title)
-            data['Body'].append(BeautifulSoup(entry.summary, 'html.parser').get_text().strip())
-            data['Link'].append(entry.link)
-            process_entry_date(entry, data)
-
-    df = pd.DataFrame(data)
-    upload_new_records_to_mongo(df)
-
-def process_entry_date(entry, data):
-    """Process the published date of an RSS entry."""
-    if 'published' in entry:
-        try:
-            parsed_date = parser.parse(entry.published)
-            data['Published_Date'].append(entry.published)
-            data['Published_Date_Formatted'].append(parsed_date.strftime('%Y-%m-%d'))
-            data['Published_Time'].append(parsed_date.strftime('%H:%M:%S'))
-        except ValueError:
-            data['Published_Date'].append(None)
-            data['Published_Date_Formatted'].append(None)
-            data['Published_Time'].append(None)
-    else:
-        data['Published_Date'].append(None)
-        data['Published_Date_Formatted'].append(None)
-        data['Published_Time'].append(None)
-
-def upload_new_records_to_mongo(df):
-    """Upload new unique records to MongoDB."""
-    existing_records = collection.distinct("Link")
-    df['is_existing'] = df['Link'].isin(existing_records)
-    new_records = df[~df['is_existing']].drop(columns=['is_existing'])
-
-    records = new_records.to_dict(orient='records')
-    if records:
-        collection.insert_many(records)
-        print(f"Successfully uploaded {len(records)} new records to MongoDB.")
-    else:
-        print("No new records found to upload.")
-
-def run_feed_update_if_time():
-    """Run feed update if the current time is within the specified range."""
-    now = datetime.datetime.now()
-    if 30 <= now.minute <= 35:
-        process_rss_feeds(rss_sources)
-        print("feedupdate.py has been executed.")
 
 @app.get("/rss/{iata_code}")
 def generate_rss_feed(iata_code: str):
@@ -130,7 +64,6 @@ def generate_rss_feed(iata_code: str):
     fg.link(href='http://www.example.com', rel='alternate')
     fg.description('This is an example RSS feed')
 
-    run_feed_update_if_time()
     items = get_data_from_source(iata_code)
 
     if not items:
