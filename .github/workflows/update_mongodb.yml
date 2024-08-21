@@ -46,7 +46,7 @@ jobs:
         
       - name: Build static files
         run: |
-          ./start.sh
+          uvicorn app:app --host 0.0.0.0 --port $PORT
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
