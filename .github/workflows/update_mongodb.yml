@@ -32,3 +32,17 @@ jobs:
           COLLECTION_NAME: ${{ secrets.COLLECTION_NAME }}
           RSS_SOURCES_COLLECTION_NAME: ${{ secrets.RSS_SOURCES_COLLECTION_NAME }}
         run: python update_mongodb.py
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: update  # Ensure this job runs after the update job
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./  # Adjust this if your static files are in a different directory
