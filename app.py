@@ -23,8 +23,25 @@ all_documents = list(airport_collection.find())
 airport_df = pd.DataFrame(all_documents)
 
 def fetch_airport_data(iata_code):
-    """Fetch airport data from Excel based on IATA code."""
-    return airport_df[airport_df['IATACode'] == iata_code]
+    """Fetch airport data from MongoDB based on IATA code."""
+    try:
+        # MongoDB'den havalimanı verisini al
+        airport_data = airport_collection.find_one({"IATACode": iata_code})
+        if not airport_data:
+            return pd.DataFrame()
+        
+        # MongoDB verisini DataFrame'e dönüştür
+        df = pd.DataFrame([{
+            'IATACode': airport_data['IATACode'],
+            'AirportName': airport_data['AirportName'],
+            'City': airport_data['City'],
+            'Country': airport_data['CountryName'],
+            'tagList': airport_data.get('tagList', '')
+        }])
+        return df
+    except Exception as e:
+        print(f"Havalimanı verisi alınırken hata oluştu: {e}")
+        return pd.DataFrame()
 
 def get_tags_from_airport_data(airport_df):
     """Extract tags from airport data."""
@@ -82,8 +99,8 @@ def generate_rss_feed(iata_code: str):
 def calculate_reading_time(text):
     """
     Metni okumak için gereken tahmini süreyi hesaplar.
-    Ortalama okuma hızı: 185 kelime/dakika
-    Çıktı formatı: X dakika Y saniye
+    Ortalama okuma hizi: 185 kelime/dakika
+    Cikti formati: X dakika Y saniye
     """
     words = len(text.split())
     total_minutes = words / 185  # Dakikada 185 kelime okunduğunu varsayıyoruz
@@ -147,3 +164,58 @@ def add_item_to_feed(fg, item):
 async def read_home(request: Request):
     """Render the home page."""
     return templates.TemplateResponse("index.html", {"request": request})
+
+@app.get("/airports/{iata_code}", response_class=HTMLResponse)
+async def airport_detail(request: Request, iata_code: str):
+    try:
+        # Havalimanı verilerini al
+        airport_data = airport_collection.find_one({"IATACode": iata_code.upper()})  # IATA kodunu büyük harfe çevir
+        
+        # Havalimanı bulunamadıysa 404 hatası döndür
+        if not airport_data:
+            raise HTTPException(
+                status_code=404, 
+                detail=f"'{iata_code}' IATA kodlu havalimanı bulunamadı"
+            )
+        
+        # Haberleri al ve işle
+        news_items = get_data_from_source(iata_code)
+        
+        # Haber tarihlerini işle
+        for item in news_items:
+            try:
+                item['parsed_date'] = datetime.strptime(item['Published_Date_Formatted'], '%Y-%m-%d')
+            except:
+                item['parsed_date'] = datetime.min
+        
+        # Haberleri tarihe göre sırala
+        news_items.sort(key=lambda x: x['parsed_date'], reverse=True)
+        
+        # Etiketleri düzenle
+        if 'tagList' in airport_data:
+            airport_data['tagList'] = airport_data['tagList'].replace('\\b', '').replace('\\b', '')
+        
+        # Template verilerini hazırla
+        context = {
+            "request": request,
+            "iata_code": iata_code.upper(),
+            "airport_name": airport_data.get('AirportName', 'Bilinmiyor'),
+            "airport_city": airport_data.get('City', 'Bilinmiyor'),
+            "airport_country": airport_data.get('CountryName', 'Bilinmiyor'),
+            "airport_data": airport_data,
+            "news_items": news_items,
+            "rss_url": f"/rss/{iata_code}",
+            "calculate_reading_time": calculate_reading_time
+        }
+        
+        return templates.TemplateResponse("airport_detail.html", context)
+    
+    except HTTPException as he:
+        # HTTP hatalarını yeniden yükselt
+        raise he
+    except Exception as e:
+        print(f"Beklenmeyen hata oluştu: {str(e)}")
+        raise HTTPException(
+            status_code=500, 
+            detail=f"Sunucu hatası: {str(e)}"
+        )
