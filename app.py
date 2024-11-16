@@ -60,14 +60,18 @@ def get_data_from_source(iata_code=None):
 def generate_rss_feed(iata_code: str):
     """Generate RSS feed for the given IATA code."""
     fg = FeedGenerator()
-    fg.title(f'{iata_code} RSS Feed')
-    fg.link(href='http://www.example.com', rel='alternate')
-    fg.description('This is an example RSS feed')
+    fg.title(f'{iata_code} Havalimani RSS Beslemesi')
+    fg.link(href=f'https://aviarss.onrender.com/rss/{iata_code}', rel='self')
+    fg.link(href='https://aviarss.onrender.com', rel='alternate')
+    fg.description(f'{iata_code} havalimani ile ilgili haberler ve guncellemeler')
+    fg.language('tr')
+    fg.lastBuildDate()
+    fg.generator('AviRSS Feed Generator')
 
     items = get_data_from_source(iata_code)
 
     if not items:
-        raise HTTPException(status_code=404, detail="No items found for the given IATA code")
+        raise HTTPException(status_code=404, detail="Belirtilen IATA kodu için öğe bulunamadı")
 
     for item in items:
         add_item_to_feed(fg, item)
@@ -75,27 +79,69 @@ def generate_rss_feed(iata_code: str):
     rss_feed = fg.rss_str(pretty=True)
     return Response(content=rss_feed, media_type='application/rss+xml')
 
+def calculate_reading_time(text):
+    """
+    Metni okumak için gereken tahmini süreyi hesaplar.
+    Ortalama okuma hızı: 185 kelime/dakika
+    Çıktı formatı: X dakika Y saniye
+    """
+    words = len(text.split())
+    total_minutes = words / 185  # Dakikada 185 kelime okunduğunu varsayıyoruz
+    
+    # Tam dakika ve saniye hesaplama
+    minutes = int(total_minutes)
+    seconds = int((total_minutes - minutes) * 60)
+    
+    if minutes == 0 and seconds < 30:
+        return "30 saniyeden az"
+    elif minutes == 0:
+        return f"{seconds} saniye"
+    elif seconds == 0:
+        return f"{minutes} dakika"
+    else:
+        return f"{minutes} dk {seconds} sn"
+
 def add_item_to_feed(fg, item):
     """Add a single item to the RSS feed."""
     fe = fg.add_entry()
     fe.title(str(item['Title']))
+    fe.link(href=str(item['Link']))
+    
+    # Yazar bilgisi ekleme
+    if 'Author' in item and item['Author']:
+        fe.author({'name': item['Author']})
+    else:
+        fe.author({'name': 'AviRSS'})
+
     body_text = str(item['Body'])
 
+    # Tahmini okuma süresini hesapla
+    reading_time = calculate_reading_time(item['Title'] + " " + body_text)
+    
     if 'matched_tags' in item and item['matched_tags']:
         for tag in item['matched_tags']:
             body_text = body_text.replace(tag, f"<strong><u>{tag}</u></strong>")
         tags_str = ', '.join(item['matched_tags'])
-        body_text += f"<hr/><br/><br/><strong>Matched Tags:</strong> {tags_str}"
+        body_text += f"<hr/><br/><br/><strong>Eşleşen Etiketler:</strong> {tags_str}"
+
+    # Tahmini okuma süresini ekle
+    body_text += f"<br/><strong>Tahmini Okuma Suresi:</strong> {reading_time}"
 
     fe.description(body_text)
 
+    # Tarih ve zaman bilgilerini ekleme
     if 'Published_Date_Formatted' in item and item['Published_Date_Formatted']:
-        fe.description(f"{fe.description()}<br/><strong>Published Date:</strong> {item['Published_Date_Formatted']}")
+        fe.description(f"{fe.description()}<br/><strong>Yayın Tarihi:</strong> {item['Published_Date_Formatted']}")
+        try:
+            fe.pubDate(item['Published_Date_Formatted'])
+        except:
+            pass
 
     if 'Published_Time' in item and item['Published_Time']:
-        fe.description(f"{fe.description()}<br/><strong>Published Time:</strong> {item['Published_Time']}")
+        fe.description(f"{fe.description()}<br/><strong>Yayın Saati:</strong> {item['Published_Time']}")
 
-    fe.link(href=str(item['Link']))
+    # GUID ekleme
+    fe.guid(str(item['Link']))
 
 @app.get("/", response_class=HTMLResponse)
 async def read_home(request: Request):
