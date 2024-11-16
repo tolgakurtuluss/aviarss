@@ -3,72 +3,130 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RSS Service</title>
-    <link rel="stylesheet" href="/static/styles.css"> <!-- Link to your CSS file -->
+    <title>AviRSS - Airport News Service</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="/static/styles/index.css">
+    <link rel="stylesheet" href="/static/styles/styles.css">
 </head>
 <body>
     <header>
-        <h1>Welcome to the RSS Service</h1>
-        <p>Your web-service for generating and filtering RSS feeds based on IATA codes of airports.</p>
+        <h1><i class="fas fa-plane-departure"></i> AviRSS Service</h1>
+        <p>Your comprehensive web-service for generating and filtering RSS feeds based on IATA codes of airports worldwide.</p>
     </header>
+    
     <main>
         <section>
-            <h2>How to Use</h2>
-            <p>To generate an RSS feed, follow these steps:</p>
-            <ol>
-                <li>
-                    <strong>Use the following endpoint:</strong>
-                    <p><code>https://aviarss.onrender.com/rss/{iata_code}</code></p>
-                </li>
-                <li>
-                    <strong>Replace <code>{iata_code}</code> with the desired IATA code.</strong>
-                </li><br>
-                <li>
-                    <strong>Example:</strong>
-                    <p>To get the RSS feed for Istanbul Airport, use:</p>
-                    <p><code>https://aviarss.onrender.com/rss/IST</code></p>
-                </li>
-            </ol>
-            
+            <h2><i class="fas fa-info-circle"></i> About AviRSS</h2>
+            <p>AviRSS is designed to provide users with the latest news and updates from airports around the world. Whether you're a frequent traveler, an aviation enthusiast, or just curious about airport activities, AviRSS offers a user-friendly platform to access real-time information.</p>
         </section>
-        
-        
+
         <section>
-            <h2>Feeds by Continent</h2>
-            <h3>America</h3>
-            <ul>
-                <li><a href="/rss/LAX">Los Angeles International Airport (LAX)</a></li>
-                <li><a href="/rss/JFK">John F. Kennedy International Airport (JFK)</a></li>
-                <li><a href="/rss/ORD">Chicago O'Hare International Airport (ORD)</a></li>
-            </ul>
-            <h3>Europe</h3>
-            <ul>
-                <li><a href="/rss/LHR">London Heathrow Airport (LHR)</a></li>
-                <li><a href="/rss/AMS">Amsterdam Schiphol Airport (AMS)</a></li>
-                <li><a href="/rss/CDG">Paris Charles de Gaulle Airport (CDG)</a></li>
-            </ul>
-            <h3>Africa</h3>
-            <ul>
-                <li><a href="/rss/JNB">O.R. Tambo International Airport (JNB)</a></li>
-                <li><a href="/rss/CAI">Cairo International Airport (CAI)</a></li>
-                <li><a href="/rss/CPT">Cape Town International Airport (CPT)</a></li>
-            </ul>
-            <h3>Asia</h3>
-            <ul>
-                <li><a href="/rss/PEK">Beijing Capital International Airport (PEK)</a></li>
-                <li><a href="/rss/HND">Tokyo Haneda Airport (HND)</a></li>
-                <li><a href="/rss/DXB">Dubai International Airport (DXB)</a></li>
-            </ul>
-            <h3>Australia</h3>
-            <ul>
-                <li><a href="/rss/SYD">Sydney Kingsford Smith Airport (SYD)</a></li>
-                <li><a href="/rss/MEL">Melbourne Airport (MEL)</a></li>
-                <li><a href="/rss/BNE">Brisbane Airport (BNE)</a></li>
-            </ul>
+            <h2><i class="fas fa-globe-americas"></i> How to Use</h2>
+            <div class="how-to-use">
+                <p>To generate an RSS feed, follow these steps:</p>
+                <ol>
+                    <li>
+                        <strong>Use the following endpoint:</strong>
+                        <code>https://aviarss.onrender.com/rss/{iata_code}</code>
+                    </li>
+                    <li>
+                        <strong>Replace <code>{iata_code}</code> with the desired IATA code.</strong>
+                    </li>
+                    <li>
+                        <strong>Example:</strong>
+                        <p>To get the RSS feed for Istanbul Airport, use:</p>
+                        <code>https://aviarss.onrender.com/rss/IST</code>
+                    </li>
+                </ol>
+            </div>
+        </section>
+
+        <section>
+            <h2><i class="fas fa-globe-americas"></i> Feeds by Continent</h2>
+            
+            <div class="continent-section">
+                <h3><i class="fas fa-map-marker-alt continent-icon"></i>America</h3>
+                <ul>
+                    <li>
+                        <a href="/airports/LAX">Los Angeles International Airport (LAX)</a>
+                        <small><a href="/rss/LAX"><i class="fas fa-rss"></i> RSS</a></small>
+                    </li>
+                    <li>
+                        <a href="/airports/JFK">John F. Kennedy International Airport (JFK)</a>
+                        <small><a href="/rss/JFK"><i class="fas fa-rss"></i> RSS</a></small>
+                    </li>
+                    <li>
+                        <a href="/airports/ORD">Chicago O'Hare International Airport (ORD)</a>
+                        <small><a href="/rss/ORD"><i class="fas fa-rss"></i> RSS</a></small>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="continent-section">
+                <h3><i class="fas fa-map-marker-alt continent-icon"></i>Europe</h3>
+                <ul>
+                    <li>
+                        <a href="/airports/LHR">London Heathrow Airport (LHR)</a>
+                        <small><a href="/rss/LHR"><i class="fas fa-rss"></i> RSS</a></small>
+                    </li>
+                    <li>
+                        <a href="/airports/AMS">Amsterdam Schiphol Airport (AMS)</a>
+                        <small><a href="/rss/AMS"><i class="fas fa-rss"></i> RSS</a></small>
+                    </li>
+                    <li>
+                        <a href="/airports/CDG">Paris Charles de Gaulle Airport (CDG)</a>
+                        <small><a href="/rss/CDG"><i class="fas fa-rss"></i> RSS</a></small>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Diğer kıtalar için benzer yapıyı tekrarla -->
+            <div class="continent-section">
+                <h3><i class="fas fa-map-marker-alt continent-icon"></i>Africa</h3>
+                <ul>
+                    <li>
+                        <a href="/airports/JNB">O.R. Tambo International Airport (JNB)</a>
+                        <small><a href="/rss/JNB"><i class="fas fa-rss"></i> RSS</a></small>
+                    </li>
+                    <li>
+                        <a href="/airports/CAI">Cairo International Airport (CAI)</a>
+                        <small><a href="/rss/CAI"><i class="fas fa-rss"></i> RSS</a></small>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="continent-section">
+                <h3><i class="fas fa-map-marker-alt continent-icon"></i>Asia</h3>
+                <ul>
+                    <li>
+                        <a href="/airports/HND">Tokyo Haneda Airport (HND)</a>
+                        <small><a href="/rss/HND"><i class="fas fa-rss"></i> RSS</a></small>
+                    </li>
+                    <li>
+                        <a href="/airports/SIN">Singapore Changi Airport (SIN)</a>
+                        <small><a href="/rss/SIN"><i class="fas fa-rss"></i> RSS</a></small>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="continent-section">
+                <h3><i class="fas fa-map-marker-alt continent-icon"></i>Australia</h3>
+                <ul>
+                    <li>
+                        <a href="/airports/SYD">Sydney Kingsford Smith Airport (SYD)</a>
+                        <small><a href="/rss/SYD"><i class="fas fa-rss"></i> RSS</a></small>
+                    </li>
+                    <li>
+                        <a href="/airports/MEL">Melbourne Airport (MEL)</a>
+                        <small><a href="/rss/MEL"><i class="fas fa-rss"></i> RSS</a></small>
+                    </li>
+                </ul>
+            </div>
         </section>
     </main>
+
     <footer>
-        <p>&copy; 2024 RSS Service. All rights reserved.</p>
+        <p>&copy; 2024 AviRSS Service. All rights reserved. <i class="fas fa-heart" style="color: #e53e3e;"></i></p>
     </footer>
 </body>
 </html>

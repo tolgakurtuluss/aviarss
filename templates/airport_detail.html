@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ airport_name }} ({{ iata_code }}) - Haberler</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="/static/styles/airport_detail.css">
+    
+</head>
+<body>
+    <header>
+        <h1>{{ airport_name }} ({{ iata_code }})</h1>
+        <p><i class="fas fa-map-marker-alt"></i> {{ airport_city }}, {{ airport_country }}</p>
+        <img src="https://flagsapi.com/{{ airport_data.get('country_code', 'BE') }}/flat/64.png" alt="Ülke Bayrağı" class="country-flag">
+    </header>
+    
+    <main class="news-container">
+        <div class="tab-container">
+            <div class="tab-buttons">
+                <button class="tab-button active" onclick="openTab('info')">
+                    <i class="fas fa-info-circle"></i> Havalimanı Bilgileri
+                </button>
+                <button class="tab-button" onclick="openTab('news')">
+                    <i class="fas fa-newspaper"></i> Haberler
+                </button>
+                <button class="tab-button" onclick="openTab('map')">
+                    <i class="fas fa-map-marked-alt"></i> Canlı Harita
+                </button>
+                <button class="tab-button" onclick="openTab('weather')">
+                    <i class="fas fa-cloud-sun"></i> Hava Durumu
+                </button>
+                <button class="tab-button" onclick="openTab('events')">
+                    <i class="fas fa-calendar-alt"></i> Bölge Etkinlikleri
+                </button>
+                <button class="tab-button" onclick="openTab('links')">
+                    <i class="fas fa-link"></i> Faydalı Linkler
+                </button>
+            </div>
+        </div>
+
+        <div id="info" class="tab-content active">
+            <div class="airport-info">
+                <div class="info-card">
+                    <h3><i class="fas fa-plane"></i> Temel Bilgiler</h3>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <span class="info-label"><i class="fas fa-fingerprint"></i> IATA Kodu</span>
+                            <span class="info-value">{{ iata_code }}</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label"><i class="fas fa-plane-departure"></i> ICAO Kodu</span>
+                            <span class="info-value">{{ airport_data.get('ICAOCode', 'Bilinmiyor') }}</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label"><i class="fas fa-building"></i> Havalimanı Adı</span>
+                            <span class="info-value">{{ airport_data.get('AirportName', 'Bilinmiyor') }}</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label"><i class="fas fa-city"></i> Şehir</span>
+                            <span class="info-value">{{ airport_data.get('City', 'Bilinmiyor') }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="info-card">
+                    <h3><i class="fas fa-map-marked-alt"></i> Konum Bilgileri</h3>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <span class="info-label"><i class="fas fa-globe-europe"></i> Ülke</span>
+                            <span class="info-value">{{ airport_data.get('CountryName', 'Bilinmiyor') }} ({{ airport_data.get('TRCountry', 'Bilinmiyor') }})</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label"><i class="fas fa-map-marker-alt"></i> Koordinatlar</span>
+                            <span class="info-value">{{ airport_data.get('Airport-Latitude', 'Bilinmiyor') }}°N, {{ airport_data.get('Airport-Longitude', 'Bilinmiyor') }}°E</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label"><i class="fas fa-globe-americas"></i> Kıta</span>
+                            <span class="info-value">{{ airport_data.get('continent', 'Bilinmiyor') }}</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label"><i class="fas fa-map"></i> Yerel İsim</span>
+                            <span class="info-value">{{ airport_data.get('local_name', '-') if airport_data.get('local_name') != '-' else 'Belirtilmemiş' }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="info-card">
+                    <h3><i class="fas fa-clock"></i> Zaman ve İletişim</h3>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <span class="info-label"><i class="fas fa-clock"></i> Saat Dilimi</span>
+                            <span class="info-value">{{ airport_data.get('timezone', 'Bilinmiyor') }} ({{ airport_data.get('timezone_abbreviation', 'Bilinmiyor') }})</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label"><i class="fas fa-sun"></i> Yaz Saati</span>
+                            <span class="info-value">{{ airport_data.get('dst_abbreviation', 'Bilinmiyor') }}</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label"><i class="fas fa-phone"></i> Telefon Kodu</span>
+                            <span class="info-value">{{ airport_data.get('Phone_code', 'Bilinmiyor') }}</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label"><i class="fas fa-money-bill-wave"></i> Para Birimi</span>
+                            <span class="info-value">{{ airport_data.get('Currency', 'Bilinmiyor') }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                {% if airport_data.get('tagList') %}
+                <div class="info-card">
+                    <h3><i class="fas fa-tags"></i> İlgili Etiketler</h3>
+                    <div class="tags-container">
+                        {% for tag in airport_data.get('tagList', '').split(', ') %}
+                            {% if tag %}
+                            <span class="info-tag"><i class="fas fa-tag"></i> {{ tag }}</span>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div id="news" class="tab-content">
+            <div class="filters">
+                <h3><i class="fas fa-filter"></i> Filtreler</h3>
+                <div class="search-container">
+                    <i class="fas fa-search search-icon"></i>
+                    <input type="text" id="searchInput" placeholder="Haberlerde ara..." onkeyup="filterNews()">
+                </div>
+                <a href="{{ rss_url }}" target="_blank" class="rss-link">
+                    <i class="fas fa-rss"></i> RSS Beslemesi
+                </a>
+            </div>
+
+            <div id="newsItems">
+                {% for item in news_items %}
+                <article class="news-item">
+                    <h2 class="news-title">
+                        <a href="{{ item.Link }}" target="_blank">{{ item.Title }}</a>
+                    </h2>
+                    <div class="news-meta">
+                        <span><i class="fas fa-user"></i> {{ item.Author if item.Author else "AviRSS" }}</span>
+                        <span><i class="far fa-calendar-alt"></i> {{ item.Published_Date_Formatted }}</span>
+                        {% if calculate_reading_time %}
+                        <span><i class="far fa-clock"></i> {{ calculate_reading_time(item.Title + " " + item.Body) }}</span>
+                        {% endif %}
+                    </div>
+                    <div class="news-body">{{ item.Body }}</div>
+                    {% if item.matched_tags %}
+                    <div class="tags">
+                        {% for tag in item.matched_tags %}
+                        <span class="tag"><i class="fas fa-tag"></i> {{ tag }}</span>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </article>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div id="map" class="tab-content">
+            <div class="map-container">
+                <div class="info-card">
+                    <h3><i class="fas fa-plane"></i> Canlı Uçuş Trafiği</h3>
+                    <div class="embed-container">
+                        <iframe 
+                            title="FlightRadar24" 
+                            width="100%" 
+                            height="600" 
+                            src="https://www.flightradar24.com/simple_index.php?lat={{ airport_data['Airport-Latitude'] }}&lon={{ airport_data['Airport-Longitude'] }}&z=11" 
+                            style="border: none; border-radius: 10px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"
+                            allowfullscreen>
+                        </iframe>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="weather" class="tab-content">
+            <div class="weather-container">
+                <div class="info-card">
+                    <h3><i class="fas fa-wind"></i> Hava Durumu Haritası</h3>
+                    <div class="embed-container">
+                        <iframe width="100%" height="500" 
+                            src="https://embed.windy.com/embed.html?type=map&location=coordinates&metricRain=default&metricTemp=default&metricWind=default&zoom=9&overlay=wind&product=ecmwf&level=surface&lat={{ airport_data.get('Airport-Latitude', 0) }}&lon={{ airport_data.get('Airport-Longitude', 0) }}" 
+                            frameborder="0">
+                        </iframe>
+                    </div>
+                </div>
+
+                <div class="info-card">
+                    <h3><i class="fas fa-cloud"></i> METAR Bilgileri</h3>
+                    <div class="metar-container">
+                        <a href="https://metar-taf.com/{{ airport_data.get('ICAOCode', 'Bilinmiyor') }}" 
+                           id="metartaf-{{ airport_data.get('ICAOCode', 'Bilinmiyor') }}" 
+                           style="font-size:18px; font-weight:500; color:#000; width:100%; height:278px; display:block; text-align: center;">
+                            METAR {{ airport_data.get('AirportName', 'Bilinmiyor') }}
+                        </a>
+                        <script async defer crossorigin="anonymous" 
+                            src="https://metar-taf.com/embed-js/{{ airport_data.get('ICAOCode', 'Bilinmiyor') }}?layout=landscape&qnh=hPa&rh=rh&target=5TVKHpU3">
+                        </script>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="events" class="tab-content">
+            <div class="events-container">
+                <div class="info-card">
+                    <h3><i class="fas fa-calendar-alt"></i> Bölge Etkinlikleri</h3>
+                    <p>
+                        Bu sekmede, havalimanına yakın bölgelerde gerçekleşen etkinlikleri keşfedebilirsiniz. 
+                        Konserler, festivaller, sergiler ve daha fazlası hakkında bilgi alarak seyahatinizi 
+                        daha keyifli hale getirebilirsiniz. Aşağıdaki harita üzerinden etkinlikleri görüntüleyin.
+                    </p>
+                    <div class="embed-container">
+                        <iframe src="https://10times.com/events/nearby?lat={{ airport_data.get('Airport-Latitude') }}&lng={{ airport_data.get('Airport-Longitude') }}&event_type=0&industry=" 
+                                style="width:100%; height:500px; border: none; border-radius: 10px;" frameborder="0" 
+                                title="Bölgedeki Etkinlikler">
+                        </iframe>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="links" class="tab-content">
+            <div class="links-container">
+                <div class="info-card">
+                    <h3><i class="fas fa-search"></i> Uçuş Arama</h3>
+                    <div class="search-links">
+                        <a href="https://www.skyscanner.com.tr/transport/flights/{{ airport_data.get('IATACode') }}/" 
+                           class="search-link" target="_blank">
+                            <i class="fas fa-plane-departure"></i>
+                            Skyscanner'da Uçuş Ara
+                        </a>
+                        <a href="https://www.kayak.com.tr/flights/{{ airport_data.get('IATACode') }}-anywhere" 
+                           class="search-link" target="_blank">
+                            <i class="fas fa-plane-arrival"></i>
+                            Kayak'ta Uçuş Ara
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <p>&copy; 2024 AviRSS. Tüm hakları saklıdır.</p>
+    </footer>
+
+    <script>
+    function filterNews() {
+        const searchText = document.getElementById('searchInput').value.toLowerCase();
+        const newsItems = document.getElementsByClassName('news-item');
+        
+        Array.from(newsItems).forEach(item => {
+            const title = item.querySelector('.news-title').textContent.toLowerCase();
+            const body = item.querySelector('.news-body').textContent.toLowerCase();
+            
+            if (title.includes(searchText) || body.includes(searchText)) {
+                item.style.display = '';
+            } else {
+                item.style.display = 'none';
+            }
+        });
+    }
+
+    function openTab(tabName) {
+        const tabContents = document.getElementsByClassName('tab-content');
+        const tabButtons = document.getElementsByClassName('tab-button');
+        
+        // Tüm sekme içeriklerini gizle
+        Array.from(tabContents).forEach(tab => {
+            tab.classList.remove('active');
+        });
+        
+        // Tüm sekme butonlarından active sınıfını kaldır
+        Array.from(tabButtons).forEach(button => {
+            button.classList.remove('active');
+        });
+        
+        // Seçilen sekmeyi göster
+        document.getElementById(tabName).classList.add('active');
+        
+        // Tıklanan butonu aktif yap
+        event.currentTarget.classList.add('active');
+    }
+    </script>
+</body>
+</html>
