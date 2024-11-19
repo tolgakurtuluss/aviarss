@@ -1,6 +1,7 @@
 import os
 import wikipedia
 import pandas as pd
+from flask import Flask, jsonify
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import Response, HTMLResponse
 from fastapi.templating import Jinja2Templates
@@ -103,7 +104,12 @@ def generate_rss_feed(iata_code: str):
     except Exception as e:
         summary = "No summary available."
         
-    return Response(content=rss_feed, summary=summary, media_type='application/rss+xml')
+    # Create a response dictionary
+    response_data = {
+        'rss_feed': rss_feed,
+        'summary': summary
+    }
+    return jsonify(response_data)
 
 def calculate_reading_time(text):
     """
