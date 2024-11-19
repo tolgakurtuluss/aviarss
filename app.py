@@ -1,4 +1,5 @@
 import os
+import wikipedia
 import pandas as pd
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import Response, HTMLResponse
@@ -95,7 +96,14 @@ def generate_rss_feed(iata_code: str):
         add_item_to_feed(fg, item)
 
     rss_feed = fg.rss_str(pretty=True)
-    return Response(content=rss_feed, media_type='application/rss+xml')
+
+    # Fetch Wikipedia summary
+    try:
+        summary = wikipedia.summary(wikipedia.search(f"IATA:{iata_code} airport")[0]).strip()
+    except Exception as e:
+        summary = "No summary available."
+        
+    return Response(content=rss_feed, summary=summary, media_type='application/rss+xml')
 
 def calculate_reading_time(text):
     """
