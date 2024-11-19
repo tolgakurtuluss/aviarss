@@ -8,3 +8,4 @@ jinja2
 pymongo
 bs4
 scikit-learn
+wikipedia
