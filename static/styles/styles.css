@@ -318,3 +318,11 @@ footer {
         gap: 0.5rem;
     }
 }
+
+.continent-section {
+    margin-top: 2rem;
+}
+
+.continent-icon {
+    margin-right: 0.5rem;
+}
